@@ -47,14 +47,12 @@ def calculate_features_without_pyradiomics(image: Image, mask_image: Image):
     pixel_spacing = image.GetSpacing()
     index_of_pixel_array = []
     pixel_array = []
-    coordinate_col = 0
-    coordinate_row = 0
+    col_min = len(mask_array[0][0])
+    col_max = 0
+    row_min = len(mask_array[0])
+    row_max = 0
     for slice in range(mask_array.shape[0]):
-        row_min = len(mask_array[0])
-        row_max = 0
         for row in range(mask_array.shape[1]):
-            col_min = len(mask_array[0][0])
-            col_max = 0
             for col in range(mask_array.shape[2]):
                 if mask_array[slice, row, col] != 0:
                     index_of_pixel_array.append([slice, row, col])
@@ -66,10 +64,8 @@ def calculate_features_without_pyradiomics(image: Image, mask_image: Image):
                         row_min = row
                     if row_max < row:
                         row_max = row
-            if coordinate_col < (col_max - col_min) * pixel_spacing[0]:
-                coordinate_col = (col_max - col_min) * pixel_spacing[0]
-        if coordinate_row < (row_max - row_min) * pixel_spacing[1]:
-            coordinate_row = (row_max - row_min) * pixel_spacing[1]
+    coordinate_col = (col_max - col_min) * pixel_spacing[0]
+    coordinate_row = (row_max - row_min) * pixel_spacing[1]
     coordinate_slice = (index_of_pixel_array[-1][0] - index_of_pixel_array[0][0]) * pixel_spacing[2]
     for index_pixel in index_of_pixel_array:
         pixel_array.append(image_array[index_pixel[0]][index_pixel[1]][index_pixel[2]])
