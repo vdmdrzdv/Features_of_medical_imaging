@@ -69,8 +69,9 @@ def calculate_features_without_pyradiomics(image: Image, mask_image: Image):
     coordinate_slice = (index_of_pixel_array[-1][0] - index_of_pixel_array[0][0]) * pixel_spacing[2]
     for index_pixel in index_of_pixel_array:
         pixel_array.append(image_array[index_pixel[0]][index_pixel[1]][index_pixel[2]])
+    volume = pixel_spacing[0] * pixel_spacing[1] * pixel_spacing[2] * len(pixel_array)
     return {'Mean': np.mean(pixel_array), 'Standard Deviation': np.std(pixel_array), 'Median': np.median(pixel_array),
-            'ColumnSize': coordinate_col, 'RowSize': coordinate_row, 'SliceSize': coordinate_slice}
+            'ColumnSize': coordinate_col, 'RowSize': coordinate_row, 'SliceSize': coordinate_slice, 'Volume': volume}
 
 
 if __name__ == "__main__":
