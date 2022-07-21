@@ -50,7 +50,6 @@ if __name__ == "__main__":
     mask_path: str = "data/mask.nrrd"
     slice: int = 174
     show_dicom(image_path, mask_path, slice)
-    # _ = calculate_all_parameters(image_path, mask_path)
 
     firstorder_features: list[str] = ['Mean', 'StandardDeviation', 'Median']
     print('Calculated first order features: ')
