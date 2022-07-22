@@ -10,7 +10,7 @@ def show_dicom(image: Image, mask_image: Image, slice: int):
     plt.subplot(1, 2, 1)
     plt.imshow(sitk.GetArrayFromImage(image)[slice, :, :], cmap="gray")
     plt.axis('off')
-    plt.title("Печень")
+    plt.title("Снимок")
     plt.subplot(1, 2, 2)
     plt.imshow(sitk.GetArrayFromImage(mask_image)[slice, :, :])
     plt.title("Маска")
@@ -51,6 +51,8 @@ def calculate_features_without_pyradiomics(image: Image, mask_image: Image):
     col_max = 0
     row_min = len(mask_array[0])
     row_max = 0
+
+    # Applying a mask to an image and calculating dimensions
     for slice in range(mask_array.shape[0]):
         for row in range(mask_array.shape[1]):
             for col in range(mask_array.shape[2]):
@@ -69,9 +71,22 @@ def calculate_features_without_pyradiomics(image: Image, mask_image: Image):
     coordinate_slice = (index_of_pixel_array[-1][0] - index_of_pixel_array[0][0]) * pixel_spacing[2]
     for index_pixel in index_of_pixel_array:
         pixel_array.append(image_array[index_pixel[0]][index_pixel[1]][index_pixel[2]])
+
+    # Volume calculation
     volume = pixel_spacing[0] * pixel_spacing[1] * pixel_spacing[2] * len(pixel_array)
+
+    # Calculation of minor and major length
+    Np = len(index_of_pixel_array)  # number of voxels
+    coordinates = np.array(index_of_pixel_array, dtype='int')
+    physicalCoordinates = coordinates * pixel_spacing
+    physicalCoordinates -= np.mean(physicalCoordinates, axis=0)
+    physicalCoordinates /= np.sqrt(Np)
+    covariance = np.dot(physicalCoordinates.T.copy(), physicalCoordinates)
+    eigenValues = np.linalg.eigvals(covariance)
+    eigenValues.sort()
     return {'Mean': np.mean(pixel_array), 'Standard Deviation': np.std(pixel_array), 'Median': np.median(pixel_array),
-            'ColumnSize': coordinate_col, 'RowSize': coordinate_row, 'SliceSize': coordinate_slice, 'Volume': volume}
+            'ColumnSize': coordinate_col, 'RowSize': coordinate_row, 'SliceSize': coordinate_slice, 'Volume': volume,
+            'Minor Axis Length': np.sqrt(eigenValues[1]) * 4, 'Major Axis Length': np.sqrt(eigenValues[2]) * 4}
 
 
 if __name__ == "__main__":
